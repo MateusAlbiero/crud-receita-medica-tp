@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Put, Delete, Param, Body, Query, NotFoundException, Res } from '@nestjs/common';
+import { Controller, Get, Post, Param, Body, Query, NotFoundException, Res } from '@nestjs/common';
 import { PacienteService } from './paciente.service';
 import { Response } from 'express';
 
