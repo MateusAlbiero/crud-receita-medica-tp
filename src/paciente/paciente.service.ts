@@ -17,7 +17,7 @@ export interface Paciente {
 @Injectable()
 export class PacienteService {
     public paciente: Paciente[] = [];
-    public idCounter = 1;
+    public controle = 1;
 
     findAll(): Paciente[] {
         return this.paciente.filter(paciente => paciente.ativo);
@@ -43,7 +43,7 @@ export class PacienteService {
         const 
             paciente: Paciente = {
                 ...pacienteData,
-                controle: this.idCounter++,
+                controle: this.controle++,
                 ativo: true,
             };
         this.paciente.push(paciente);

@@ -12,7 +12,7 @@ describe('MedicoController', () => {
     controller = module.get<MedicoController>(MedicoController);
   });
 
-  it('should be defined', () => {
+  it('Deve ser definido', () => {
     expect(controller).toBeDefined();
   });
 });
