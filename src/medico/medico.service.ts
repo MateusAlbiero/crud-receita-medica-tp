@@ -1,37 +1,78 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { Medico } from './medico.entity';
+
+export interface Medico {
+    controle: number;
+    nome: string;
+    especialidade: string;
+    cpf: string;
+    crm: string;
+    endereco: string;
+    bairro: string;
+    cidade: string;
+    uf: string;
+    telefone?: string;
+    celular?: string;
+    email?: string;
+    ativo: boolean;
+}
 
 @Injectable()
 export class MedicoService {
-  constructor(
-    @InjectRepository(Medico)
-    private readonly medicoRepository: Repository<Medico>,
-  ) {}
+    private medicos: Medico[] = [];
+    private controle = 1;
 
-  async findAll(): Promise<Medico[]> {
-    return await this.medicoRepository.find();
-  }
-
-  async findOne(id: number): Promise<Medico> {
-    const medico = await this.medicoRepository.findOne(id);
-    if (!medico) {
-      throw new NotFoundException(`Médico com ID ${id} não encontrado`);
+    findAll(): Medico[] {
+        return this.medicos.filter(medico => medico.ativo);
     }
-    return medico;
-  }
 
-  async create(medico: Medico): Promise<Medico> {
-    return await this.medicoRepository.save(medico);
-  }
+    findOne(controle: number): Medico {
+        const medico = this.medicos.find(medico => medico.controle === controle && medico.ativo);
+        if (!medico) {
+            throw new NotFoundException('Médico não encontrado.');
+        }
+        return medico;
+    }
 
-  async update(id: number, medico: Medico): Promise<Medico> {
-    await this.medicoRepository.update(id, medico);
-    return this.findOne(id);
-  }
+    busca(query: string): Medico[] {
+        return this.medicos.filter(medico => 
+            medico.ativo &&
+            (medico.controle.toString() === query ||
+            medico.nome.includes(query) ||
+            medico.email.includes(query) ||
+            medico.cpf.includes(query.replace(/\D/g, '')) ||
+            medico.telefone.includes(query.replace(/\D/g, '')) ||
+            medico.celular.includes(query.replace(/\D/g, '')))
+        ).slice(0, 10);
+    }
 
-  async remove(id: number): Promise<void> {
-    await this.medicoRepository.delete(id);
-  }
+    cadastro(medicoData: Omit<Medico, 'controle' | 'ativo'>): Medico {
+        const medico: Medico = {
+            ...medicoData,
+            controle: this.controle++,
+            ativo: true,
+        };
+        this.medicos.push(medico);
+        return medico;
+    }
+
+    editar(controle: number, medicoData: Partial<Omit<Medico, 'controle' | 'ativo'>>): Medico {
+        const index = this.medicos.findIndex(m => m.controle === controle);
+        if (index === -1) {
+            throw new NotFoundException('Médico não encontrado.');
+        }
+        const updatedMedico = {
+            ...this.medicos[index],
+            ...medicoData,
+        };
+        this.medicos[index] = updatedMedico;
+        return updatedMedico;
+    }
+
+    inativar(controle: number): void {
+        const index = this.medicos.findIndex(m => m.controle === controle);
+        if (index === -1) {
+            throw new NotFoundException('Médico não encontrado.');
+        }
+        this.medicos[index].ativo = false;
+    }
 }
